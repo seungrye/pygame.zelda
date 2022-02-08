@@ -3,6 +3,9 @@ from debug import debug
 from level import Level
 from settings import *
 
+# 다음 내용부터 이어서 진행하기
+# https://youtu.be/QU1pPzEGrqw?t=3022
+
 class Game:
     def __init__(self):
         pygame.init()
