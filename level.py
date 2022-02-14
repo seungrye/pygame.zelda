@@ -4,7 +4,7 @@ import pygame
 from player import Player
 from debug import debug
 
-from settings import TILESIZE, WORLD_MAP
+from settings import TILESIZE
 from tile import Tile
 from support import *
 

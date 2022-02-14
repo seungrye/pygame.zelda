@@ -17,7 +17,7 @@ def import_csv_layout(filename: str) -> List[List[str]]:
         
         return terrain_map
 
-def import_folder(folder: str) -> List[List[str]]:
+def import_folder(folder: str) -> List[str]:
     """
     Imports a files under folder and returns a 2D list of strings.
     """
