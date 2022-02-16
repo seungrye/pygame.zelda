@@ -7,11 +7,15 @@ from debug import debug
 from settings import TILESIZE
 from tile import Tile
 from support import *
+from weapon import Weapon
 
 class Level:
     def __init__(self) -> None:
+        self.display_surface = pygame.display.get_surface()
         self.visible_sprites = YSortCameraGroup()
         self.obstacles_sprites = pygame.sprite.Group()
+
+        self.current_attck = None
 
         self.create_map()
 
@@ -47,7 +51,15 @@ class Level:
         #         if col == 'p':
         #             self.player = Player((x, y), [self.visible_sprites], self.obstacles_sprites)
 
-        self.player = Player((1500, 1600), [self.visible_sprites], self.obstacles_sprites)
+        self.player = Player((1500, 1600), [self.visible_sprites], self.obstacles_sprites, self.create_attack, self.destroy_attack)
+
+    def create_attack(self):
+        self.current_attck = Weapon(self.player, [self.visible_sprites])
+
+    def destroy_attack(self):
+        if self.current_attck:
+            self.current_attck.kill()
+            self.current_attck = None
 
     def run(self):
         self.visible_sprites.custom_draw(self.player)
