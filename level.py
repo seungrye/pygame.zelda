@@ -7,6 +7,7 @@ from debug import debug
 from settings import TILESIZE
 from tile import Tile
 from support import *
+from ui import UI
 from weapon import Weapon
 
 class Level:
@@ -18,6 +19,8 @@ class Level:
         self.current_attck = None
 
         self.create_map()
+
+        self.ui = UI()
 
     def create_map(self) -> None:
         layouts = {
@@ -64,7 +67,8 @@ class Level:
     def run(self):
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()  # call Player's update()
-        debug(self.player.direction)
+        self.ui.display(self.player)
+        # debug(self.player.direction)
 
 class YSortCameraGroup(pygame.sprite.Group):
     def __init__(self) -> None:
