@@ -1,4 +1,3 @@
-from tkinter import Toplevel
 import pygame
 from settings import *
 
