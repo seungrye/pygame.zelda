@@ -26,3 +26,8 @@ weapon_data = {
     'rapier': { 'cooldown': 100, 'damage': 15, 'graphic': './graphics/weapons/rapier/full.png' },
     'sai': { 'cooldown': 100, 'damage': 15, 'graphic': './graphics/weapons/sai/full.png' },
 }
+
+magic_data = {
+    'flame': { 'strength': 5, 'cost': 20, 'graphic': './graphics/particles/flame/fire.png' },
+    'heal': { 'strength': 5, 'cost': 10, 'graphic': './graphics/particles/heal/heal.png' },
+}
