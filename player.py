@@ -8,7 +8,7 @@ from settings import magic_data
 class Player(Entity):
     def __init__(self, pos, groups, obstacle_sprites, 
             create_attack, destroy_attack,
-            create_magic, destroy_magic) -> None:
+            create_magic, destroy_magic, damage_player) -> None:
         super().__init__(groups)
         self.image = pygame.image.load("./graphics/player.png").convert_alpha()
         self.rect = self.image.get_rect(topleft=pos)
@@ -52,6 +52,20 @@ class Player(Entity):
         self.energy = self.stats['energy']
         self.exp = 0 # 경험치
         self.speed = self.stats['speed']
+
+
+        self.damage_player = damage_player
+
+        # invincibility timer
+        self.vulernable = True
+        self.hurt_time = None
+        self.invincibility_duration = 300
+
+
+    def get_full_weapon_damage(self):
+        base_damage = self.stats['attack']
+        weapon_damage = weapon_data[self.weapon]['damage']
+        return base_damage + weapon_damage
 
     def import_player_assets(self):
         self.animations = {
@@ -178,7 +192,7 @@ class Player(Entity):
     def cooldowns(self):
         current_time = pygame.time.get_ticks()
         if self.attacking:
-            if current_time - self.attack_time > self.attack_cooldown:
+            if current_time - self.attack_time > self.attack_cooldown + weapon_data[self.weapon]['cooldown']:
                 self.attacking = False
                 self.destroy_attack()
                 
@@ -190,6 +204,10 @@ class Player(Entity):
             if current_time - self.magic_switch_time > self.switch_duration_cooldown:
                 self.can_switch_magic = True
 
+        if not self.vulernable:
+            if current_time - self.hurt_time > self.invincibility_duration:
+                self.vulernable = True
+
     def animate(self):
         animation = self.animations[self.status]
 
@@ -199,6 +217,14 @@ class Player(Entity):
 
         self.image = animation[int(self.frame_index)]
         self.rect = self.image.get_rect(center=self.hitbox.center)
+
+        if not self.vulernable:
+            # flicker
+            alpha = self.wave_value()
+            self.image.set_alpha(alpha)
+        else:
+            self.image.set_alpha(255)
+
 
     def update(self) -> None:
         self.input()
