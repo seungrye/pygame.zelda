@@ -2,6 +2,7 @@ import enum
 import random
 import pygame
 from enemy import Enemy
+from particles import AnimationPlayer
 from player import Player
 from debug import debug
 
@@ -24,6 +25,9 @@ class Level:
         self.create_map()
 
         self.ui = UI()
+
+        # particles
+        self.animation_player = AnimationPlayer()
 
     def create_map(self) -> None:
         layouts = {
@@ -64,7 +68,7 @@ class Level:
                             if col == '391': monster_name = 'spirit'
                             if col == '392': monster_name = 'raccoon'
                             if col == '393': monster_name = 'squid'
-                            Enemy(monster_name, (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacles_sprites)
+                            Enemy(monster_name, (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacles_sprites, self.trigger_death_particles)
 
         #         if col == "x":
         #             Tile((x, y), [self.visible_sprites, self.obstacles_sprites])
@@ -80,7 +84,11 @@ class Level:
             self.player.health -= amount
             self.player.vulernable = False
             self.player.hurt_time = pygame.time.get_ticks()
+            pos = self.player.rect.center
+            self.animation_player.create_particles(attack_type, pos, [self.visible_sprites])
 
+    def trigger_death_particles(self, pos, particle_type):
+        self.animation_player.create_particles(particle_type, pos, [self.visible_sprites])
 
     def destroy_attack(self):
         if self.current_attck:
@@ -106,6 +114,10 @@ class Level:
                 if collision_sprites:
                     for collision_sprite in collision_sprites:
                         if collision_sprite.sprite_type == 'grass':
+                            pos = collision_sprite.rect.center
+                            offset = pygame.math.Vector2(0, 75)
+                            for leaf in range(random.randint(3, 6)):
+                                self.animation_player.create_grass_particles(pos - offset, [self.visible_sprites])
                             collision_sprite.kill()
                         elif collision_sprite.sprite_type == 'enemy':
                             collision_sprite.get_damage(self.player, attack_sprite.sprite_type)

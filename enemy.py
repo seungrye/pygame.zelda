@@ -6,10 +6,11 @@ from settings import monster_data
 from player import Player
 
 class Enemy(Entity):
-    def __init__(self, monster_name, pos, groups, obstacles_sprites) -> None:
+    def __init__(self, monster_name, pos, groups, obstacles_sprites, trigger_death_particles) -> None:
         super().__init__(groups)
 
         self.sprite_type = 'enemy'
+        self.trigger_death_particles = trigger_death_particles
 
         # graphics
         self.import_graphics(monster_name)
@@ -114,6 +115,7 @@ class Enemy(Entity):
 
     def check_death(self):
         if self.health <= 0:
+            self.trigger_death_particles(self.rect.center, self.monster_name)
             self.kill()
 
     def animate(self):
