@@ -6,11 +6,12 @@ from settings import monster_data
 from player import Player
 
 class Enemy(Entity):
-    def __init__(self, monster_name, pos, groups, obstacles_sprites, trigger_death_particles) -> None:
+    def __init__(self, monster_name, pos, groups, obstacles_sprites, trigger_death_particles, add_exp) -> None:
         super().__init__(groups)
 
         self.sprite_type = 'enemy'
         self.trigger_death_particles = trigger_death_particles
+        self.add_exp = add_exp
 
         # graphics
         self.import_graphics(monster_name)
@@ -44,6 +45,14 @@ class Enemy(Entity):
         self.vulernable = True
         self.hit_time = None
         self.invincibility_duration = 300
+
+        # sounds
+        self.death_sound = pygame.mixer.Sound(f"./audio/hit.wav")
+        self.hit_sound = pygame.mixer.Sound(f"./audio/hit.wav")
+        self.attack_sound = pygame.mixer.Sound(monster_info['attack_sound'])
+        self.death_sound.set_volume(0.1)
+        self.hit_sound.set_volume(0.1)
+        self.attack_sound.set_volume(0.1)
 
     def import_graphics(self, monster_name):
         self.animations = {
@@ -80,6 +89,7 @@ class Enemy(Entity):
 
     def actions(self, player):
         if self.status == 'attack':
+            self.attack_sound.play()
             self.attack_time = pygame.time.get_ticks()
             player.damage_player(self.damage, self.attack_type)
         elif self.status == 'move':
@@ -104,19 +114,21 @@ class Enemy(Entity):
 
     def get_damage(self, player, attack_type):
         if self.vulernable:
+            self.hit_sound.play()
             self.direction = self.get_player_distance_direction(player)[1]
             if attack_type == 'weapon':
                 self.health -= player.get_full_weapon_damage()
             else:
-                # magic
-                pass
+                self.health -= player.get_full_magic_damage()
             self.hit_time = pygame.time.get_ticks()
             self.vulernable = False
 
     def check_death(self):
         if self.health <= 0:
+            self.death_sound.play()
             self.trigger_death_particles(self.rect.center, self.monster_name)
             self.kill()
+            self.add_exp(self.exp)
 
     def animate(self):
         animation = self.animations[self.status]

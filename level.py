@@ -12,8 +12,13 @@ from support import *
 from ui import UI
 from weapon import Weapon
 
+from magic import MagicPlayer
+from upgrade import Upgrade
+
 class Level:
     def __init__(self) -> None:
+        self.game_paused = False
+
         self.display_surface = pygame.display.get_surface()
         self.visible_sprites = YSortCameraGroup()
         self.obstacles_sprites = pygame.sprite.Group()
@@ -25,9 +30,12 @@ class Level:
         self.create_map()
 
         self.ui = UI()
+        self.upgrade = Upgrade(self.player)
 
         # particles
         self.animation_player = AnimationPlayer()
+
+        self.magic_player = MagicPlayer(self.animation_player)
 
     def create_map(self) -> None:
         layouts = {
@@ -68,13 +76,19 @@ class Level:
                             if col == '391': monster_name = 'spirit'
                             if col == '392': monster_name = 'raccoon'
                             if col == '393': monster_name = 'squid'
-                            Enemy(monster_name, (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacles_sprites, self.trigger_death_particles)
+                            Enemy(monster_name, (x, y), 
+                                [self.visible_sprites, self.attackable_sprites], 
+                                self.obstacles_sprites, 
+                                self.trigger_death_particles, 
+                                self.add_xp)
 
         #         if col == "x":
         #             Tile((x, y), [self.visible_sprites, self.obstacles_sprites])
         #         if col == 'p':
         #             self.player = Player((x, y), [self.visible_sprites], self.obstacles_sprites)
 
+    def toggle_menu(self):
+        self.game_paused = not self.game_paused
 
     def create_attack(self):
         self.current_attck = Weapon(self.player, [self.visible_sprites, self.attack_sprites])
@@ -95,11 +109,23 @@ class Level:
             self.current_attck.kill()
             self.current_attck = None
 
+    def add_xp(self, amount):
+        self.player.exp += amount
+
     def create_magic(self, style, strength, cost):
         # self.current_attck = Weapon(self.player, [self.visible_sprites])
-        print(style)
-        print(strength)
-        print(cost)
+
+        if style == 'heal':
+            self.magic_player.heal(self.player, strength, cost, [self.visible_sprites])
+            pass
+
+        if style == 'flame':
+            self.magic_player.flame(self.player, cost, [self.visible_sprites, self.attack_sprites])
+            pass
+
+        # print(style)
+        # print(strength)
+        # print(cost)
 
     def destroy_magic(self):
         pass
@@ -125,10 +151,14 @@ class Level:
 
     def run(self):
         self.visible_sprites.custom_draw(self.player)
-        self.visible_sprites.update()  # call Player's update()
-        self.visible_sprites.enemy_update(self.player)
-        self.player_attack_logic()
         self.ui.display(self.player)
+
+        if self.game_paused:
+            self.upgrade.display()
+        else:
+            self.visible_sprites.update()  # call Player's update()
+            self.visible_sprites.enemy_update(self.player)
+            self.player_attack_logic()
 
 class YSortCameraGroup(pygame.sprite.Group):
     def __init__(self) -> None:
